@@ -40,10 +40,9 @@ interface OpportunityCardProps {
 export default function OpportunityCard({ opportunity: opp, onClick }: OpportunityCardProps) {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { isFavorite, toggle } = useFavoritesStore();
+  const { isFavorite, toggleFavorite } = useFavoritesStore();
 
   const handleClick = onClick ?? (() => router.push(`/opportunities/${opp.id}`));
-  const isAuth = user !== null;
   const fav = isFavorite(opp.id);
 
   const salary = formatSalary(opp.salary_min, opp.salary_max);
@@ -85,7 +84,7 @@ export default function OpportunityCard({ opportunity: opp, onClick }: Opportuni
     >
       {/* Favorite button */}
       <button
-        onClick={(e) => { e.stopPropagation(); toggle(opp.id, isAuth); }}
+        onClick={(e) => { e.stopPropagation(); toggleFavorite(opp.id); }}
         aria-label={fav ? "Убрать из избранного" : "Добавить в избранное"}
         className="absolute right-4 top-4 transition-colors"
         style={{ color: fav ? "#F97316" : "#CBD5E1" }}

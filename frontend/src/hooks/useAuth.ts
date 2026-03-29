@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { User } from "@/types";
 import { authApi } from "@/lib/api";
+import { useFavoritesStore } from "@/store/favoritesStore";
 
 interface AuthState {
   user: User | null;
@@ -20,12 +21,15 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const { data } = await authApi.me();
       set({ user: data, isLoading: false });
+      await useFavoritesStore.getState().initForUser();
     } catch {
       set({ user: null, isLoading: false });
+      useFavoritesStore.getState().initForGuest();
     }
   },
   logout: async () => {
     await authApi.logout();
     set({ user: null, isLoading: false });
+    useFavoritesStore.getState().clearFavorites();
   },
 }));

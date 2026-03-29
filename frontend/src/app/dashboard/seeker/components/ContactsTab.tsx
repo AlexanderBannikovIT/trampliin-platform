@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import api from "@/lib/api";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -607,9 +608,42 @@ function RecommendationsTab() {
               </div>
             </div>
             {r.opportunity_title && (
-              <p className="text-sm text-orange-600 font-medium pl-12">
-                {r.opportunity_title}
-              </p>
+              <div className="pl-12 flex items-center gap-2">
+                <Link
+                  href={`/opportunities/${r.opportunity_id}`}
+                  style={{
+                    color: "#F97316",
+                    fontWeight: 500,
+                    fontSize: 14,
+                    textDecoration: "none",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.textDecoration = "underline";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.textDecoration = "none";
+                  }}
+                >
+                  {r.opportunity_title}
+                </Link>
+                <Link
+                  href={`/opportunities/${r.opportunity_id}`}
+                  style={{
+                    fontSize: 11,
+                    padding: "2px 8px",
+                    background: "#FFF7ED",
+                    color: "#F97316",
+                    border: "1px solid #FED7AA",
+                    borderRadius: 20,
+                    textDecoration: "none",
+                    fontWeight: 500,
+                    flexShrink: 0,
+                  }}
+                >
+                  Открыть →
+                </Link>
+              </div>
             )}
             {r.message && (
               <p className="text-xs text-gray-500 pl-12 italic">{r.message}</p>

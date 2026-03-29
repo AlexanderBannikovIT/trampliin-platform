@@ -7,13 +7,12 @@ const STORAGE_KEY = "trampliin_favorites";
 
 interface FavoritesState {
   ids: Set<string>;
+  isAuth: boolean;
   isFavorite: (opportunityId: string) => boolean;
-  addFavorite: (id: string, isAuth: boolean) => Promise<void>;
-  removeFavorite: (id: string, isAuth: boolean) => Promise<void>;
-  toggle: (opportunityId: string, isAuthenticated: boolean) => Promise<void>;
   toggleFavorite: (id: string) => Promise<void>;
-  load: (isAuthenticated: boolean) => Promise<void>;
-  syncWithApi: () => Promise<void>;
+  initForUser: () => Promise<void>;
+  initForGuest: () => void;
+  clearFavorites: () => void;
 }
 
 function readStorage(): Set<string> {
@@ -31,96 +30,67 @@ function writeStorage(ids: Set<string>): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify([...ids]));
 }
 
+function clearStorage(): void {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(STORAGE_KEY);
+}
+
 export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   ids: new Set(),
+  isAuth: false,
 
   isFavorite: (id) => get().ids.has(id),
 
-  load: async (isAuthenticated) => {
-    if (isAuthenticated) {
-      try {
-        const { data } = await favoritesApi.list();
-        const remote = new Set<string>(
-          (data.items ?? []).map((f) => f.opportunity_id)
-        );
-        set({ ids: remote });
-      } catch {
-        // silently fall back to local
-        set({ ids: readStorage() });
-      }
-    } else {
-      set({ ids: readStorage() });
-    }
-  },
-
-  addFavorite: async (id, isAuth) => {
-    const { ids } = get();
-    if (ids.has(id)) return;
-    const next = new Set(ids);
-    next.add(id);
-    set({ ids: next });
-    if (isAuth) {
-      try { await favoritesApi.add(id); } catch { /* ignore */ }
-    } else {
-      writeStorage(next);
-    }
-  },
-
-  removeFavorite: async (id, isAuth) => {
-    const { ids } = get();
-    if (!ids.has(id)) return;
-    const next = new Set(ids);
-    next.delete(id);
-    set({ ids: next });
-    if (isAuth) {
-      try { await favoritesApi.remove(id); } catch { /* ignore */ }
-    } else {
-      writeStorage(next);
-    }
-  },
-
-  toggle: async (id, isAuthenticated) => {
-    const { ids, addFavorite, removeFavorite } = get();
-    if (ids.has(id)) {
-      await removeFavorite(id, isAuthenticated);
-    } else {
-      await addFavorite(id, isAuthenticated);
-    }
-  },
-
-  // toggleFavorite — без параметра isAuth: пишет в localStorage И пробует API
-  toggleFavorite: async (id) => {
-    const { ids } = get();
-    const next = new Set(ids);
-    if (ids.has(id)) {
-      next.delete(id);
-      set({ ids: next });
-      writeStorage(next);
-      try { await favoritesApi.remove(id); } catch { /* ignore */ }
-    } else {
-      next.add(id);
-      set({ ids: next });
-      writeStorage(next);
-      try { await favoritesApi.add(id); } catch { /* ignore */ }
-    }
-  },
-
-  /** Call after login to push local favorites to the server, then reload from API. */
-  syncWithApi: async () => {
-    const local = readStorage();
-    // POST each local favorite to the server (ignore errors for already-saved ones)
-    await Promise.allSettled([...local].map((id) => favoritesApi.add(id)));
-    // Clear local storage now that they're on the server
-    localStorage.removeItem(STORAGE_KEY);
-    // Reload from server
+  /** Call after successful login — loads from API, clears any leftover localStorage. */
+  initForUser: async () => {
+    clearStorage();
     try {
       const { data } = await favoritesApi.list();
       const remote = new Set<string>(
         (data.items ?? []).map((f) => f.opportunity_id)
       );
-      set({ ids: remote });
+      set({ ids: remote, isAuth: true });
     } catch {
-      // keep whatever is in state
+      set({ ids: new Set(), isAuth: true });
+    }
+  },
+
+  /** Call on app start when not authenticated. */
+  initForGuest: () => {
+    set({ ids: readStorage(), isAuth: false });
+  },
+
+  /** Call on logout — wipes state and localStorage. */
+  clearFavorites: () => {
+    clearStorage();
+    set({ ids: new Set(), isAuth: false });
+  },
+
+  toggleFavorite: async (id) => {
+    const { ids, isAuth } = get();
+    const next = new Set(ids);
+    const removing = ids.has(id);
+
+    if (removing) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    set({ ids: next });
+
+    if (isAuth) {
+      try {
+        if (removing) {
+          await favoritesApi.remove(id);
+        } else {
+          await favoritesApi.add(id);
+        }
+      } catch {
+        // Revert on failure
+        set({ ids });
+      }
+    } else {
+      writeStorage(next);
     }
   },
 }));

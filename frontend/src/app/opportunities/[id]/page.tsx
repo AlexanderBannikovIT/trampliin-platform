@@ -36,7 +36,7 @@ export default function OpportunityDetailPage({
 }) {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { isFavorite, toggle } = useFavoritesStore();
+  const { isFavorite, toggleFavorite } = useFavoritesStore();
 
   const [opp, setOpp] = useState<Opportunity | null>(null);
   const [loading, setLoading] = useState(true);
@@ -107,7 +107,6 @@ export default function OpportunityDetailPage({
     );
   }
 
-  const isAuth = user !== null;
   const fav = isFavorite(opp.id);
 
   const salary =
@@ -151,7 +150,7 @@ export default function OpportunityDetailPage({
                 </span>
               </div>
               <button
-                onClick={() => toggle(opp.id, isAuth)}
+                onClick={() => toggleFavorite(opp.id)}
                 aria-label={fav ? "Убрать из избранного" : "Добавить в избранное"}
                 className={`transition-colors flex-shrink-0 ${fav ? "text-orange-500" : "text-gray-300 hover:text-gray-400"}`}
               >
@@ -267,7 +266,7 @@ export default function OpportunityDetailPage({
 
               <button
                 onClick={() => {
-                  toggle(opp.id, isAuth);
+                  toggleFavorite(opp.id);
                   if (!fav) showToast("Добавлено в избранное");
                 }}
                 className={`w-full rounded-lg border py-2.5 text-sm font-medium transition-colors ${

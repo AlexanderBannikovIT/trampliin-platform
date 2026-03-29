@@ -7,14 +7,9 @@ import OpportunityCard from "@/components/opportunities/OpportunityCard";
 import type { Opportunity } from "@/types";
 
 export default function FavoritesTab() {
-  const { ids, removeFavorite, load } = useFavoritesStore();
+  const { ids, toggleFavorite } = useFavoritesStore();
   const [items, setItems] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Load server-side favorites on mount
-  useEffect(() => {
-    load(true).finally(() => {});
-  }, []);
 
   // Whenever ids change, fetch full opportunity data for each id
   useEffect(() => {
@@ -42,7 +37,7 @@ export default function FavoritesTab() {
   }, [ids]);
 
   async function handleRemove(id: string) {
-    await removeFavorite(id, true);
+    await toggleFavorite(id);
   }
 
   if (loading) {
