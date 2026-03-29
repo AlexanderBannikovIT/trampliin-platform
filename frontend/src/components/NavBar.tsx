@@ -22,7 +22,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 
 export default function NavBar() {
   const router = useRouter();
-  const { user, isLoading, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
 
   async function handleLogout() {
     await logout();
@@ -42,9 +42,7 @@ export default function NavBar() {
       </Link>
 
       <nav className="flex items-center gap-2">
-        {isLoading ? (
-          <div className="h-7 w-32 rounded-lg bg-gray-100 animate-pulse" />
-        ) : user ? (
+        {user ? (
           <>
             <Link
               href={getDashboardUrl(user.role)}
