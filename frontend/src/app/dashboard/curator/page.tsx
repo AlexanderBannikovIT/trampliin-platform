@@ -186,9 +186,53 @@ function CuratorContent() {
         </div>
       </header>
 
+      {/* Mobile top tab bar */}
+      <div className="lg:hidden" style={{ background: "white", borderBottom: "1px solid #E2E8F0" }}>
+        <div style={{ display: "flex", overflowX: "auto", gap: 4, padding: "8px 16px" }}>
+          {(
+            [
+              { id: "verification", label: "Верификация" },
+              { id: "moderation", label: "Модерация" },
+              { id: "tags", label: "Теги" },
+              { id: "users", label: "Пользователи" },
+              ...(user.role === "admin" ? [{ id: "curators", label: "Кураторы" }] : []),
+            ] as { id: Section; label: string }[]
+          ).map(({ id, label }) => {
+            const count = queueCounts[id as keyof typeof queueCounts] ?? 0;
+            return (
+              <button
+                key={id}
+                onClick={() => setSection(id)}
+                style={{
+                  flexShrink: 0,
+                  padding: "8px 16px",
+                  borderRadius: 20,
+                  border: "none",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  background: section === id ? "#F97316" : "#F1F5F9",
+                  color: section === id ? "white" : "#475569",
+                  transition: "all 0.15s",
+                  position: "relative",
+                }}
+              >
+                {label}
+                {count > 0 && (
+                  <span style={{ position: "absolute", top: 4, right: 4, background: section === id ? "white" : "#F97316", color: section === id ? "#F97316" : "white", borderRadius: "50%", fontSize: 9, fontWeight: 700, minWidth: 14, height: 14, display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <aside className="hidden md:flex w-56 flex-shrink-0 flex-col py-4 bg-white border-r border-gray-100">
+        <aside className="hidden lg:flex w-56 flex-shrink-0 flex-col py-4 bg-white border-r border-gray-100">
           <nav className="flex flex-col gap-1 px-2">
             {(
               [
@@ -232,32 +276,7 @@ function CuratorContent() {
           </nav>
         </aside>
 
-        {/* Mobile tabs */}
-        <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-gray-100 bg-white shadow-lg overflow-x-auto">
-          <div className="flex min-w-max px-2">
-            {(
-              [
-                { id: "verification", label: "Верификация" },
-                { id: "moderation", label: "Модерация" },
-                { id: "tags", label: "Теги" },
-                { id: "users", label: "Пользователи" },
-                ...(user.role === "admin" ? [{ id: "curators", label: "Кураторы" }] : []),
-              ] as { id: Section; label: string }[]
-            ).map(({ id, label }) => (
-              <button
-                key={id}
-                onClick={() => setSection(id)}
-                className={`flex-shrink-0 px-5 py-3 text-xs font-medium whitespace-nowrap transition-colors ${
-                  section === id ? "text-orange-500 border-t-2 border-orange-500 -mt-px" : "text-gray-500"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
           <div className="max-w-4xl mx-auto">
 
             {/* ── Verification ─────────────────────────────────────────────── */}

@@ -84,9 +84,42 @@ function DashboardContent() {
         </div>
       </header>
 
+      {/* Mobile top tab bar */}
+      <div className="lg:hidden" style={{ background: "white", borderBottom: "1px solid #E2E8F0" }}>
+        <div style={{ display: "flex", overflowX: "auto", gap: 4, padding: "8px 16px" }}>
+          {TABS.map(({ id, label, badge }) => (
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              style={{
+                flexShrink: 0,
+                padding: "8px 16px",
+                borderRadius: 20,
+                border: "none",
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+                background: activeTab === id ? "#F97316" : "#F1F5F9",
+                color: activeTab === id ? "white" : "#475569",
+                transition: "all 0.15s",
+                position: "relative",
+              }}
+            >
+              {label}
+              {badge ? (
+                <span style={{ position: "absolute", top: 4, right: 4, background: "#ef4444", color: "white", borderRadius: "50%", fontSize: 9, fontWeight: 700, minWidth: 14, height: 14, display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "0 3px" }}>
+                  {badge}
+                </span>
+              ) : null}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar nav */}
-        <aside className="hidden md:flex w-56 flex-shrink-0 flex-col py-4 bg-white border-r border-gray-100">
+        <aside className="hidden lg:flex w-56 flex-shrink-0 flex-col py-4 bg-white border-r border-gray-100">
           <p className="px-4 mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
             Кабинет
           </p>
@@ -112,30 +145,8 @@ function DashboardContent() {
           </nav>
         </aside>
 
-        {/* Mobile tab bar */}
-        <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-gray-100 bg-white shadow-lg overflow-x-auto">
-          <div className="flex min-w-max px-2">
-            {TABS.map(({ id, label, badge }) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`relative flex-shrink-0 px-5 py-3 text-xs font-medium whitespace-nowrap transition-colors ${
-                  activeTab === id ? "text-orange-500 border-t-2 border-orange-500 -mt-px" : "text-gray-500"
-                }`}
-              >
-                {label}
-                {badge ? (
-                  <span className="absolute top-1.5 right-1.5 inline-flex items-center justify-center rounded-full bg-orange-500 text-white text-[9px] font-bold min-w-[14px] h-3.5 px-0.5">
-                    {badge}
-                  </span>
-                ) : null}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-6">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
           <div className="max-w-4xl mx-auto">
             {/* Breadcrumb-style title */}
             <div className="mb-6">
